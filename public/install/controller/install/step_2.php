@@ -237,23 +237,23 @@ class ControllerInstallStep2 extends Controller {
 			$this->error['warning'] = $this->language->get('error_image_catalog');
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/cache')) {
+		if (!is_writable(DIR_STORAGE . 'cache')) {
 			$this->error['warning'] = $this->language->get('error_cache');
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/logs')) {
+		if (!is_writable(DIR_STORAGE . 'logs')) {
 			$this->error['warning'] = $this->language->get('error_log');
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/download')) {
+		if (!is_writable(DIR_STORAGE . 'download')) {
 			$this->error['warning'] = $this->language->get('error_download');
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/upload')) {
+		if (!is_writable(DIR_STORAGE . 'upload')) {
 			$this->error['warning'] = $this->language->get('error_upload');
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/modification')) {
+		if (!is_writable(DIR_STORAGE . 'modification')) {
 			$this->error['warning'] = $this->language->get('error_modification');
 		}
 
