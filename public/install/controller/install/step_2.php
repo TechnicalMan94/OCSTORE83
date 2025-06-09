@@ -77,7 +77,7 @@ class ControllerInstallStep2 extends Controller {
 		} else {
 			$data['error_image'] = '';
 		}
-
+		
 		if (!is_writable(DIR_OPENCART . 'image/cache/')) {
 			$data['error_image_cache'] = $this->language->get('error_unwritable');
 		} else {
@@ -90,31 +90,31 @@ class ControllerInstallStep2 extends Controller {
 			$data['error_image_catalog'] = '';
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/cache/')) {
+		if (!is_writable(DIR_STORAGE . 'cache/')) {
 			$data['error_cache'] = $this->language->get('error_unwritable');
 		} else {
 			$data['error_cache'] = '';
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/logs/')) {
+		if (!is_writable(DIR_STORAGE . 'logs/')) {
 			$data['error_logs'] = $this->language->get('error_unwritable');
 		} else {
 			$data['error_logs'] = '';
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/download/')) {
+		if (!is_writable(DIR_STORAGE . 'download/')) {
 			$data['error_download'] = $this->language->get('error_unwritable');
 		} else {
 			$data['error_download'] = '';
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/upload/')) {
+		if (!is_writable(DIR_STORAGE . 'upload/')) {
 			$data['error_upload'] = $this->language->get('error_unwritable');
 		} else {
 			$data['error_upload'] = '';
 		}
 
-		if (!is_writable(DIR_SYSTEM . 'storage/modification/')) {
+		if (!is_writable(DIR_STORAGE . 'modification/')) {
 			$data['error_modification'] = $this->language->get('error_unwritable');
 		} else {
 			$data['error_modification'] = '';
