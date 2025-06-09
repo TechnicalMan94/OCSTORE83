@@ -10,6 +10,7 @@
     },
     "require": {
 		"twig/twig": "^3.0",
-		"ezyang/htmlpurifier": "^4.17"
+		"ezyang/htmlpurifier": "^4.17",
+		"scssphp/scssphp": "^1.13"
 	}
 }
