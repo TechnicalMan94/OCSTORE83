@@ -25,6 +25,10 @@ class ComposerStaticInita8cb75283b86ff94542c6f1327c4ce59
             'Symfony\\Polyfill\\Ctype\\' => 23,
             'ScssPhp\\ScssPhp\\' => 16,
         ),
+        'P' => 
+        array (
+            'PHPMailer\\PHPMailer\\' => 20,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -47,6 +51,10 @@ class ComposerStaticInita8cb75283b86ff94542c6f1327c4ce59
         'ScssPhp\\ScssPhp\\' => 
         array (
             0 => __DIR__ . '/..' . '/scssphp/scssphp/src',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
     );
 

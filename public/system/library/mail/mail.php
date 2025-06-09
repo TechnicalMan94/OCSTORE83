@@ -1,97 +1,72 @@
 <?php
 namespace Mail;
 
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
+
 class Mail
 {
 	public function send(): void
 	{
-		$to = is_array($this->to) ? implode(', ', $this->to) : $this->to;
+		$mail = new PHPMailer(true);  // true - для включения исключений
 
-		$boundary = '----=_NextPart_' . md5(time());
-		$altBoundary = '----=_NextPart_alt_' . md5(time());
-		$encodedSender = '=?UTF-8?B?' . base64_encode($this->sender) . '?=';
+		try {
 
-		$headers = [
-			'MIME-Version: 1.0',
-			'Date: ' . date('D, d M Y H:i:s O'),
-			'From: ' . $encodedSender . ' <' . $this->from . '>',
-			'Reply-To: ' . ($this->reply_to
-				? '=?UTF-8?B?' . base64_encode($this->reply_to) . '?= <' . $this->reply_to . '>'
-				: $encodedSender . ' <' . $this->from . '>'),
-			'Return-Path: ' . $this->from,
-			'X-Mailer: PHP/' . phpversion(),
-			'Content-Type: multipart/mixed; boundary="' . $boundary . '"',
-			''
-		];
+			$mail->CharSet = PHPMailer::CHARSET_UTF8;
+			
+			// Настройки сервера (если используется SMTP)
+			// $mail->isSMTP();
+			// $mail->Host = 'smtp.example.com';
+			// $mail->SMTPAuth = true;
+			// $mail->Username = 'user@example.com';
+			// $mail->Password = 'secret';
+			// $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+			// $mail->Port = 465;
 
-		$message = [];
+			
+			// Отправитель
+			$mail->setFrom($this->from, $this->sender);
 
-		if (!$this->html) {
-			// Просто текстовое письмо
-			$message[] = '--' . $boundary;
-			$message[] = 'Content-Type: text/plain; charset="utf-8"';
-			$message[] = 'Content-Transfer-Encoding: 8bit';
-			$message[] = '';
-			$message[] = $this->text;
-		} else {
-			// HTML письмо с альтернативной текстовой версией
-			$message[] = '--' . $boundary;
-			$message[] = 'Content-Type: multipart/alternative; boundary="' . $altBoundary . '"';
-			$message[] = '';
 
-			// Текстовая версия
-			$message[] = '--' . $altBoundary;
-			$message[] = 'Content-Type: text/plain; charset="utf-8"';
-			$message[] = 'Content-Transfer-Encoding: 8bit';
-			$message[] = '';
-			$message[] = $this->text ?: 'To view this email, please use an HTML compatible email viewer.';
-			$message[] = '';
-
-			// HTML версия
-			$message[] = '--' . $altBoundary;
-			$message[] = 'Content-Type: text/html; charset="utf-8"';
-			$message[] = 'Content-Transfer-Encoding: 8bit';
-			$message[] = '';
-			$message[] = $this->html;
-			$message[] = '';
-
-			// Конец альтернативной части
-			$message[] = '--' . $altBoundary . '--';
-			$message[] = '';
-		}
-
-		// Вложения
-		foreach ($this->attachments as $attachment) {
-			if (file_exists($attachment)) {
-				$content = file_get_contents($attachment);
-				$filename = basename($attachment);
-				$encodedContent = chunk_split(base64_encode($content));
-
-				$message[] = '--' . $boundary;
-				$message[] = 'Content-Type: application/octet-stream; name="' . $filename . '"';
-				$message[] = 'Content-Transfer-Encoding: base64';
-				$message[] = 'Content-Disposition: attachment; filename="' . $filename . '"';
-				$message[] = 'Content-ID: <' . urlencode($filename) . '>';
-				$message[] = 'X-Attachment-Id: ' . urlencode($filename);
-				$message[] = '';
-				$message[] = $encodedContent;
-				$message[] = '';
+			// Получатели
+			if (is_array($this->to)) {
+				foreach ($this->to as $recipient) {
+					$mail->addAddress($recipient);
+				}
+			} else {
+				$mail->addAddress($this->to);
 			}
-		}
 
-		// Конец письма
-		$message[] = '--' . $boundary . '--';
+			// Ответить кому (если указано)
+			if ($this->reply_to) {
+				$mail->addReplyTo($this->reply_to);
+			}
 
-		ini_set('sendmail_from', $this->from);
+			// Тема письма
+			$mail->Subject = $this->subject;
 
-		$subject = '=?UTF-8?B?' . base64_encode($this->subject) . '?=';
-		$fullMessage = implode(PHP_EOL, $message);
-		$fullHeaders = implode(PHP_EOL, $headers);
+			// Тело письма
+			if ($this->html) {
+				$mail->isHTML(true);
+				$mail->Body = $this->html;
+				$mail->AltBody = $this->text ?: 'This is a HTML email. Please use an HTML compatible email viewer.';
+			} else {
+				$mail->isHTML(false);
+				$mail->Body = $this->text;
+			}
 
-		if ($this->parameter) {
-			mail($to, $subject, $fullMessage, $fullHeaders, $this->parameter);
-		} else {
-			mail($to, $subject, $fullMessage, $fullHeaders);
+			// Вложения
+			foreach ($this->attachments as $attachment) {
+				if (file_exists($attachment)) {
+					$mail->addAttachment($attachment);
+				}
+			}
+
+			// Отправка
+			$mail->send();
+		} catch (Exception $e) {
+			// Обработка ошибки (можно логировать или выбросить исключение)
+			throw new Exception("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
 		}
 	}
 }
