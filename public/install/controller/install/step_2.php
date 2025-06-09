@@ -151,11 +151,11 @@ class ControllerInstallStep2 extends Controller {
 		$data['image'] = DIR_OPENCART . 'image';
 		$data['image_cache'] = DIR_OPENCART . 'image/cache';
 		$data['image_catalog'] = DIR_OPENCART . 'image/catalog';
-		$data['cache'] = DIR_SYSTEM . 'storage/cache';
-		$data['logs'] = DIR_SYSTEM . 'storage/logs';
-		$data['download'] = DIR_SYSTEM . 'storage/download';
-		$data['upload'] = DIR_SYSTEM . 'storage/upload';
-		$data['modification'] = DIR_SYSTEM . 'storage/modification';
+		$data['cache'] = DIR_STORAGE . 'cache';
+		$data['logs'] = DIR_STORAGE . 'logs';
+		$data['download'] = DIR_STORAGE . 'download';
+		$data['upload'] = DIR_STORAGE . 'upload';
+		$data['modification'] = DIR_STORAGE . 'modification';
 
 		$data['back'] = $this->url->link('install/step_1');
 
