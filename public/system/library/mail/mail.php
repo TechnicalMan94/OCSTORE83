@@ -8,14 +8,15 @@ class Mail
 		$to = is_array($this->to) ? implode(', ', $this->to) : $this->to;
 
 		$boundary = '----=_NextPart_' . md5(time());
+		$altBoundary = '----=_NextPart_alt_' . md5(time());
 		$encodedSender = '=?UTF-8?B?' . base64_encode($this->sender) . '?=';
 
-		$header = [
+		$headers = [
 			'MIME-Version: 1.0',
 			'Date: ' . date('D, d M Y H:i:s O'),
 			'From: ' . $encodedSender . ' <' . $this->from . '>',
 			'Reply-To: ' . ($this->reply_to
-				? '=?UTF-8?B?' . base64_encode($this->reply_to) . '?= <' . $this->reply_to_email . '>'
+				? '=?UTF-8?B?' . base64_encode($this->reply_to) . '?= <' . $this->reply_to . '>'
 				: $encodedSender . ' <' . $this->from . '>'),
 			'Return-Path: ' . $this->from,
 			'X-Mailer: PHP/' . phpversion(),
@@ -26,29 +27,40 @@ class Mail
 		$message = [];
 
 		if (!$this->html) {
+			// Просто текстовое письмо
 			$message[] = '--' . $boundary;
 			$message[] = 'Content-Type: text/plain; charset="utf-8"';
 			$message[] = 'Content-Transfer-Encoding: 8bit';
 			$message[] = '';
 			$message[] = $this->text;
 		} else {
+			// HTML письмо с альтернативной текстовой версией
 			$message[] = '--' . $boundary;
-			$message[] = 'Content-Type: multipart/alternative; boundary="' . $boundary . '_alt"';
+			$message[] = 'Content-Type: multipart/alternative; boundary="' . $altBoundary . '"';
 			$message[] = '';
-			$message[] = '--' . $boundary . '_alt';
+
+			// Текстовая версия
+			$message[] = '--' . $altBoundary;
 			$message[] = 'Content-Type: text/plain; charset="utf-8"';
 			$message[] = 'Content-Transfer-Encoding: 8bit';
 			$message[] = '';
-			$message[] = $this->text ?: 'This is a HTML email and your email client software does not support HTML email!';
+			$message[] = $this->text ?: 'To view this email, please use an HTML compatible email viewer.';
+			$message[] = '';
 
-			$message[] = '--' . $boundary . '_alt';
+			// HTML версия
+			$message[] = '--' . $altBoundary;
 			$message[] = 'Content-Type: text/html; charset="utf-8"';
 			$message[] = 'Content-Transfer-Encoding: 8bit';
 			$message[] = '';
 			$message[] = $this->html;
-			$message[] = '--' . $boundary . '_alt--';
+			$message[] = '';
+
+			// Конец альтернативной части
+			$message[] = '--' . $altBoundary . '--';
+			$message[] = '';
 		}
 
+		// Вложения
 		foreach ($this->attachments as $attachment) {
 			if (file_exists($attachment)) {
 				$content = file_get_contents($attachment);
@@ -63,21 +75,23 @@ class Mail
 				$message[] = 'X-Attachment-Id: ' . urlencode($filename);
 				$message[] = '';
 				$message[] = $encodedContent;
+				$message[] = '';
 			}
 		}
 
+		// Конец письма
 		$message[] = '--' . $boundary . '--';
 
 		ini_set('sendmail_from', $this->from);
 
 		$subject = '=?UTF-8?B?' . base64_encode($this->subject) . '?=';
 		$fullMessage = implode(PHP_EOL, $message);
-		$fullHeader = implode(PHP_EOL, $header);
+		$fullHeaders = implode(PHP_EOL, $headers);
 
 		if ($this->parameter) {
-			mail($to, $subject, $fullMessage, $fullHeader, $this->parameter);
+			mail($to, $subject, $fullMessage, $fullHeaders, $this->parameter);
 		} else {
-			mail($to, $subject, $fullMessage, $fullHeader);
+			mail($to, $subject, $fullMessage, $fullHeaders);
 		}
 	}
 }
